@@ -23,28 +23,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 2. Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          # ⚠️ Replace these with your actual Google Cloud configuration values
-          workload_identity_provider: 'projects/YOUR_PROJECT_ID/locations/global/workloadIdentityPools/YOUR_POOL_ID/providers/YOUR_PROVIDER_ID'
-          service_account: 'your-service-account@your-project-id.iam.gserviceaccount.com'
-
-      - name: 3. Install Gemini CLI
-        uses: google-gemini/setup-gemini@v0.3.0
-
-      - name: 4. Get Changed Files
+      - name: 2. Get Changed Files
         id: changed_files
         run: |
           echo "files=$(git diff --name-only HEAD~1 HEAD | grep -vE '^(docs/|README.md|\.github/)' | xargs)" >> $GITHUB_OUTPUT
 
-      - name: 5. Run Gemini Docs Generator
+      - name: 3. Run Gemini Docs Generator
         if: steps.changed_files.outputs.files != ''
         id: gemini_run
-        run: |
-          bash .github/scripts/generate_docs.sh "${{ steps.changed_files.outputs.files }}" > temp_docs.md
+        uses: google-gemini/gemini-cli-action@v0
+        with:
+          # ⚠️ Erstatt med dine Google Cloud-verdier
+          project_id: 'YOUR_PROJECT_ID'
+          service_account: 'your-service-account@your-project-id.iam.gserviceaccount.com'
+          workload_identity_provider: 'projects/YOUR_PROJECT_ID/locations/global/workloadIdentityPools/YOUR_POOL_ID/providers/YOUR_PROVIDER_ID'
+          # Kommandoen som skal kjøres
+          command: bash .github/scripts/generate_docs.sh "${{ steps.changed_files.outputs.files }}" > temp_docs.md
 
-      - name: 6. Commit and Push Documentation
+      - name: 4. Commit and Push Documentation
         if: steps.gemini_run.outcome == 'success'
         run: |
           mv temp_docs.md docs/overview.md
