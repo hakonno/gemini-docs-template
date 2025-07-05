@@ -21,6 +21,7 @@ jobs:
           echo "commit_diff=$(git diff HEAD~1 HEAD)" >> $GITHUB_OUTPUT
 
       - name: Run AI Documentation Agent
+        if: "!contains(steps.commit_info.outputs.commit_message, '[DEVDOCS]')"
         # This step will be implemented later.
         # It will call an AI model (e.g., via an API) with the commit info.
         # The AI will then propose changes to the /docs folder based on the rules
@@ -33,6 +34,7 @@ jobs:
           echo "Diff is available but not printed here for brevity."
 
       - name: Commit documentation changes
+        if: "!contains(steps.commit_info.outputs.commit_message, '[DEVDOCS]')"
         # This step will be implemented later.
         # It will take the output from the AI step and commit it to the repository.
         run: |

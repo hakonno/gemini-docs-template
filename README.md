@@ -18,6 +18,10 @@ This template provides a framework for AI agents to manage documentation. It is 
     *   **After implementing changes,** you instruct your agent to update the `docs/` directory with everything it has learned.
 4.  **Automation (Optional):** A skeleton GitHub Action workflow is included in `.github/workflows/docs_updater.yml`. You can adapt this to automatically run an AI agent to update the docs after every commit, creating a fully autonomous documentation system.
 
+## Development Mode
+
+To prevent the automated workflow from running, for instance during a work-in-progress, simply include `[DEVDOCS]` anywhere in your commit message. The workflow will detect this keyword and skip the documentation update steps.
+
 ## Getting Started
 
 ### Step 1: Use This Template
