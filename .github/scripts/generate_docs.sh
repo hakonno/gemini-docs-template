@@ -1,0 +1,6 @@
+#!/bin/bashset -e# --- Inputs ---CHANGED_FILES_STRING=$1DOCS_FILE="docs/overview.md"# --- Build context from changed files ---CODE_CHANGES=""for file in $CHANGED_FILES_STRING; do  if [ -f "$file" ]; then    CODE_CHANGES+="--- File: $file ---
+"    CODE_CHANGES+=$(cat "$file")    CODE_CHANGES+="
+
+"  else    CODE_CHANGES+="--- File: $file (deleted) ---
+
+"  fi; done# --- Read existing documentation for context ---if [ -f "$DOCS_FILE" ]; then  EXISTING_DOCS=$(cat "$DOCS_FILE")else  EXISTING_DOCS="This is a new project. Please create a technical overview based on the code provided."fi# --- Call the Gemini API with a structured prompt ---gemini --prompt-file - <<PROMPTYou are an expert technical writer for an open-source project.Your sole task is to maintain a technical overview document in Markdown format.Be precise, concise, and strictly factual based on the provided code.Do NOT add any conversational fluff, introductions, or conclusions.Your entire output must be ONLY the raw, updated Markdown content for the documentation file.--- EXISTING DOCUMENTATION ---$EXISTING_DOCS--- RECENT CODE CHANGES ---The following files were just changed. Update the existing documentation to reflect the new state of the project. Ensure the final text is a complete, coherent, and up-to-date version of the entire document.$CODE_CHANGESPROMPT

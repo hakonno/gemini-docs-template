@@ -1,0 +1,13 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+
+# Python
+__pycache__/
+*.pyc
+.env
+.venv
+venv/
+env/
