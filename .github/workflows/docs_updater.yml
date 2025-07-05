@@ -31,7 +31,7 @@ jobs:
       - name: 3. Run Gemini Docs Generator
         if: steps.changed_files.outputs.files != ''
         id: gemini_run
-        uses: google-gemini/gemini-cli-action@v0
+        uses: google-gemini/gemini-cli-action@v1
         with:
           # ⚠️ Erstatt med dine Google Cloud-verdier
           project_id: 'YOUR_PROJECT_ID'
