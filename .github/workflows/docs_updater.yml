@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Fetches the last 2 commits.
 
       - name: Get latest commit information
         id: commit_info
