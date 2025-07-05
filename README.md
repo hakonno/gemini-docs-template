@@ -14,7 +14,7 @@ This template provides a framework for AI agents to manage documentation. It is 
 1.  **Standardized Instructions:** The template includes instruction files (`GEMINI.md`, `.github/copilot/instructions.md`, `.cursorrules`) that point the AI agent to a central set of rules located in `docs/AGENT_INSTRUCTIONS.md`.
 2.  **Core Directives:** The `docs/README.md` file contains a set of rules and heuristics that tell the agent *how* to manage the documentation—when to create new files, when to update existing ones, and how to refactor them for clarity.
 3.  **Agent-Driven Workflow:**
-    *   **On session start,** you instruct your AI agent to read the `docs/` directory to get up to speed.
+    *   **On session start,** you instruct your AI agent to read the `docs/` directory, starting with `docs/README.md`, to get up to speed.
     *   **After implementing changes,** you instruct your agent to update the `docs/` directory with everything it has learned.
 4.  **Automation (Optional):** A skeleton GitHub Action workflow is included in `.github/workflows/docs_updater.yml`. You can adapt this to automatically run an AI agent to update the docs after every commit, creating a fully autonomous documentation system.
 
