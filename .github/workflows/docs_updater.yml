@@ -1,12 +1,17 @@
-name:  Gemini AI Docs Updater
+name: Gemini AI Docs Updater
 
 on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+  # Runs on pushes to the main branch, ignoring changes to docs, README, or the workflow itself
   push:
     branches:
       - main
     paths-ignore:
       - 'docs/**'
       - 'README.md'
+      - '.github/workflows/**'
 
 permissions:
   contents: write
@@ -15,40 +20,61 @@ permissions:
 jobs:
   update_documentation:
     runs-on: ubuntu-latest
+    # Prevents recursive loops by the bot
     if: "!contains(github.event.head_commit.message, 'docs:')"
 
     steps:
       - name: 1. Checkout Code
         uses: actions/checkout@v4
         with:
+          # Fetch all history for a correct diff
           fetch-depth: 0
 
-      - name: 2. Get Changed Files
+      - name: 2. Identify Changed Files
         id: changed_files
         run: |
-          echo "files=$(git diff --name-only HEAD~1 HEAD | grep -vE '^(docs/|README.md|\.github/)' | xargs)" >> $GITHUB_OUTPUT
+          # If the workflow was triggered manually, we check all files.
+          # Otherwise, we check only the files changed in the last push.
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Workflow triggered manually. Checking all non-ignored files."
+            # List all files, respecting .gitignore, and filter out ignored paths
+            FILES=$(git ls-files | grep -vE '^(docs/|README\.md|\.github/|LICENSE)')
+          else
+            echo "Workflow triggered by push. Checking changed files."
+            FILES=$(git diff --name-only HEAD~1 HEAD | grep -vE '^(docs/|README\.md|\.github/|LICENSE)')
+          fi
+          echo "files=${FILES}" >> $GITHUB_OUTPUT
 
-      - name: 3. Run Gemini Docs Generator
+      - name: 3. Log Status or Run Generator
+        if: steps.changed_files.outputs.files == ''
+        run: echo "No documentable files changed. Skipping AI generation."
+
+      - name: 4. Run Gemini Docs Generator
         if: steps.changed_files.outputs.files != ''
         id: gemini_run
         uses: google-gemini/gemini-cli-action@main
         with:
-          # ⚠️ Erstatt med dine Google Cloud-verdier
+          # ⚠️ Replace with your Google Cloud values
           project_id: 'YOUR_PROJECT_ID'
           service_account: 'your-service-account@your-project-id.iam.gserviceaccount.com'
           workload_identity_provider: 'projects/YOUR_PROJECT_ID/locations/global/workloadIdentityPools/YOUR_POOL_ID/providers/YOUR_PROVIDER_ID'
-          # Kommandoen som skal kjøres
+          # The command to execute
           command: bash .github/scripts/generate_docs.sh "${{ steps.changed_files.outputs.files }}" > temp_docs.md
 
-      - name: 4. Commit and Push Documentation
+      - name: 5. Commit and Push Documentation
         if: steps.gemini_run.outcome == 'success'
         run: |
+          # Move the generated file to the correct location
           mv temp_docs.md docs/overview.md
           
+          # Configure git
           git config --global user.name 'Gemini Doc Bot'
           git config --global user.email 'gemini-bot@users.noreply.github.com'
+          
+          # Add and commit the changes
           git add docs/overview.md
           
+          # Commit only if there are actual changes
           if ! git diff --staged --quiet; then
             git commit -m "docs: ✨ automatic update by Gemini"
             git push
