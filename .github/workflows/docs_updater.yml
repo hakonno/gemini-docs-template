@@ -19,8 +19,13 @@ jobs:
       - name: Get latest commit information
         id: commit_info
         run: |
-          echo "commit_message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
-          echo "commit_diff=$(git diff HEAD~1 HEAD)" >> $GITHUB_OUTPUT
+          echo 'commit_message<<EOF' >> "$GITHUB_OUTPUT"
+          echo "$(git log -1 --pretty=%B)" >> "$GITHUB_OUTPUT"
+          echo 'EOF' >> "$GITHUB_OUTPUT"
+
+          echo 'commit_diff<<EOF' >> "$GITHUB_OUTPUT"
+          echo "$(git diff HEAD~1 HEAD)" >> "$GITHUB_OUTPUT"
+          echo 'EOF' >> "$GITHUB_OUTPUT"
 
       - name: Run AI Documentation Agent
         if: "!contains(steps.commit_info.outputs.commit_message, '[DEVDOCS]')"
